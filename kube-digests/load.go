@@ -16,14 +16,25 @@ type KubernetesDigests struct {
 }
 
 type kubeObject struct {
-	absolutePath     string
-	relativePath     string
-	data             interface{}
+	// File Data
+	absolutePath string
+	relativePath string
+	thumbprint   string
+
+	// Derived Data
+	kind      string
+	name      string
+	namespace string
+
+	// Imported Data
+	rawData interface{}
+
+	// Validation
 	validationErrors []string
 }
 
 func (ko *kubeObject) loadDataFromFile() {
-	var err = yaml.Unmarshal([]byte(filesystem.LoadFileIfExists(ko.absolutePath)), &ko.data)
+	var err = yaml.Unmarshal([]byte(filesystem.LoadFileIfExists(ko.absolutePath)), &ko.rawData)
 	if err != nil {
 		panic(err)
 	}

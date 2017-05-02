@@ -27,4 +27,6 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&flags.kubernetesDigestDirectory, "kubernetes-digest-directory", "d", "", "Directory containing Kubernetes digests")
+	RootCmd.PersistentFlags().CountVarP(&flags.verbosity, "verbosity", "v", "Output verbosity")
+	RootCmd.PersistentFlags().BoolVarP(&flags.debug, "debug", "", false, "Debug level output")
 }

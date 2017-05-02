@@ -25,9 +25,10 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 	var validationErrors = make(map[string][]string)
 
 	for _, ko := range kd.digests {
-		d := ko.data.(map[string]interface{})
+		d := ko.rawData.(map[string]interface{})
 		if kind, asserted := d["kind"].(string); asserted {
-			ko.validateBaseMetadata(kind, d["metadata"])
+			ko.kind = strings.ToLower(kind)
+			ko.validateBaseMetadata(d["metadata"])
 			switch kind {
 			case "ConfigMap":
 				ko.validateConfigMap()
@@ -50,7 +51,6 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 			default:
 				ko.addValidationError("Unsupported object type: " + kind)
 			}
-			println(ko.absolutePath + ": " + kind)
 		} else {
 			ko.addValidationError("Kind not specified on object")
 		}
@@ -63,12 +63,13 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 	return validationErrors
 }
 
-func (ko *kubeObject) validateBaseMetadata(kind string, metadata interface{}) {
+func (ko *kubeObject) validateBaseMetadata(metadata interface{}) {
 	m := metadata.(map[string]interface{})
 
 	// Validate filename
 	if name, asserted := m["name"].(string); asserted {
-		var filenameShouldBe = name + "." + strings.ToLower(kind) + ".yml"
+		ko.name = name
+		var filenameShouldBe = name + "." + ko.kind + ".yml"
 		if !strings.HasSuffix(ko.relativePath, filenameShouldBe) {
 			ko.addValidationError("Imporoperly named file (should be " + filenameShouldBe + ")")
 		}
@@ -78,6 +79,17 @@ func (ko *kubeObject) validateBaseMetadata(kind string, metadata interface{}) {
 
 	// Validate namespace folder structure
 	if namespace, asserted := m["namespace"].(string); asserted {
+		switch ko.kind {
+		case "namespace":
+			ko.namespace = ko.name
+			break
+		case "persistentvolume":
+			ko.namespace = "_"
+			break
+		default:
+			ko.namespace = namespace
+		}
+
 		if !strings.HasPrefix(ko.relativePath, "/"+namespace+"/") {
 			ko.addValidationError("Should exist in proper namespace folder (/" + namespace + "/)")
 		}

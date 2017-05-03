@@ -25,10 +25,9 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 	var validationErrors = make(map[string][]string)
 
 	for _, ko := range kd.digests {
-		d := ko.rawData.(map[string]interface{})
-		if kind, asserted := d["kind"].(string); asserted {
-			ko.kind = strings.ToLower(kind)
-			ko.validateBaseMetadata(d["metadata"])
+		ko.validatedData = ko.rawData.(map[string]interface{})
+		if kind, asserted := ko.validatedData["kind"].(string); asserted {
+			ko.validateBaseMetadata()
 			switch kind {
 			case "ConfigMap":
 				ko.validateConfigMap()
@@ -63,8 +62,9 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 	return validationErrors
 }
 
-func (ko *kubeObject) validateBaseMetadata(metadata interface{}) {
-	m := metadata.(map[string]interface{})
+func (ko *kubeObject) validateBaseMetadata() {
+	ko.kind = strings.ToLower(ko.validatedData["kind"].(string))
+	m := ko.validatedData["metadata"].(map[string]interface{})
 
 	// Validate filename
 	if name, asserted := m["name"].(string); asserted {
@@ -96,6 +96,8 @@ func (ko *kubeObject) validateBaseMetadata(metadata interface{}) {
 	} else {
 		ko.addValidationError("Missing 'namespace' property in metadata")
 	}
+
+	ko.validatedData["metadata"] = m
 }
 
 func (ko *kubeObject) validateConfigMap() {

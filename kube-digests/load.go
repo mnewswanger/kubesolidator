@@ -22,9 +22,10 @@ type kubeObject struct {
 	thumbprint   string
 
 	// Derived Data
-	kind      string
-	name      string
-	namespace string
+	kind          string
+	name          string
+	namespace     string
+	validatedData map[string]interface{}
 
 	// Imported Data
 	rawData interface{}
@@ -60,6 +61,7 @@ func (kd *KubernetesDigests) loadDigestsInFolder(subfolder string) {
 			var obj = kubeObject{
 				absolutePath: absolutePath,
 				relativePath: subfolder + item,
+				thumbprint:   filesystem.GetFileSHA256Checksum(absolutePath),
 			}
 			obj.loadDataFromFile()
 			kd.digests = append(kd.digests, &obj)

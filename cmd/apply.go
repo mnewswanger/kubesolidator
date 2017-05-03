@@ -15,12 +15,12 @@ var applyCmd = &cobra.Command{
 		var kd = kubeDigests.KubernetesDigests{
 			BaseDirectory: flags.kubernetesDigestDirectory,
 		}
-		kd.Apply(flags.kubernetesAPIServer, flags.dryRun, flags.debug, uint8(flags.verbosity))
+		kd.Apply(flags.kubectlContext, flags.dryRun, flags.debug, uint8(flags.verbosity))
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(applyCmd)
 	applyCmd.Flags().BoolVarP(&flags.dryRun, "dry-run", "", false, "Perform a no-op")
-	applyCmd.Flags().StringVarP(&flags.kubernetesAPIServer, "kube-api-server", "k", "", "Kubernetes API Server to operate against")
+	applyCmd.Flags().StringVarP(&flags.kubectlContext, "kubectl-context", "k", "", "Kubectl context to operate against")
 }

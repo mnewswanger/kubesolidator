@@ -2,7 +2,7 @@ package cmd
 
 type commandLineFlags struct {
 	dryRun                    bool
-	kubernetesAPIServer       string
+	kubectlContext            string
 	kubernetesDigestDirectory string
 
 	debug     bool

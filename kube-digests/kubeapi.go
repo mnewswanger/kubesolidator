@@ -1,19 +1,12 @@
 package kubeDigests
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-)
+	"strings"
 
-var apiEndpoints = map[string]string{
-	"configmap":             "/api/v1/configmaps",
-	"deployment":            "/apis/extensions/v1beta1/deployments",
-	"namespace":             "/api/v1/namespaces",
-	"persistentvolume":      "/api/v1/persistentvolumes",
-	"persistentvolumeclaim": "/api/v1/persistentvolumeclaims",
-	"service":               "/api/v1/services",
-}
+	"github.com/ghodss/yaml"
+
+	"gitlab.home.mikenewswanger.com/golang/executil"
+)
 
 type kubernetesObjectsStruct struct {
 	Items []struct {
@@ -25,23 +18,71 @@ type kubernetesObjectsStruct struct {
 	}
 }
 
-// loadKubernetesObjects by type
-func loadKubernetesObjects(kubernetesAPIServer string, apiEndpointType string) map[string]string {
+func applyKubernetesObject(kubectlContext string, file string, debug bool, verbosity uint8) {
+	var args = []string{}
+	if kubectlContext != "" {
+		args = append(args, "--context", kubectlContext)
+	}
+	args = append(args, "apply", "-f", file)
+	executil.Command{
+		Executable: "kubectl",
+		Arguments:  args,
+		Debug:      debug,
+		Verbosity:  verbosity,
+	}.RunWithRealtimeOutput()
+}
 
-	// Get the existing objects from the KubernetesAPI
-	var resp, err = http.Get(kubernetesAPIServer + apiEndpoints[apiEndpointType])
+func deleteKubernetesObject(kubectlContext string, kind string, item string, debug bool, verbosity uint8) {
+	var args = []string{}
+
+	if kubectlContext != "" {
+		args = append(args, "--context", kubectlContext)
+	}
+
+	args = append(args, "delete", kind)
+
+	// [0] = namespace; [1] = name
+	var kubeObjectParts = strings.Split(item, ":")
+	if kubeObjectParts[0] != "_" {
+		args = append(args, "--namespace", kubeObjectParts[0])
+	}
+
+	args = append(args, kubeObjectParts[1])
+
+	executil.Command{
+		Executable: "kubectl",
+		Arguments:  args,
+		Debug:      debug,
+		Verbosity:  verbosity,
+	}.RunWithRealtimeOutput()
+}
+
+// loadKubernetesObjects by type
+func loadKubernetesObjects(kubectlContext string, kind string, debug bool, verbosity uint8) map[string]string {
+
+	var args = []string{}
+	if kubectlContext != "" {
+		args = []string{"--context", kubectlContext}
+	}
+	args = append(args, "get", "--all-namespaces", "-o", "yaml", kind)
+
+	// Get the existing objects from kubectl
+	var output, err = executil.Command{
+		Name:       "Load kubernetes objects (kind: " + kind + ")",
+		Executable: "kubectl",
+		Arguments:  args,
+		Debug:      debug,
+		Verbosity:  verbosity,
+	}.RunWithOutput()
 	handleError(err)
-	defer resp.Body.Close()
-	var body []byte
-	body, err = ioutil.ReadAll(resp.Body)
-	handleError(err)
+
 	var kubernetesObjects = kubernetesObjectsStruct{}
-	err = json.Unmarshal(body, &kubernetesObjects)
+	err = yaml.Unmarshal(output, &kubernetesObjects)
 	handleError(err)
 
 	var kubeObjectList = make(map[string]string)
 	for _, item := range kubernetesObjects.Items {
-		switch apiEndpointType {
+		switch kind {
 		case "namespace":
 			item.Metadata.Namespace = item.Metadata.Name
 			break

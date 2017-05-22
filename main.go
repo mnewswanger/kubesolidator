@@ -1,6 +1,8 @@
 package main
 
-import "gitlab.home.mikenewswanger.com/infrastructure/kubesolidator/cmd"
+import (
+    "go.mikenewswanger.com/kubesolidator/cmd"
+)
 
 func main() {
 	cmd.Execute()

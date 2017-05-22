@@ -5,7 +5,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"gitlab.home.mikenewswanger.com/golang/filesystem"
+	"go.mikenewswanger.com/utilities/filesystem"
 )
 
 // KubernetesDigests provides interaaction to the digest repository contents
@@ -35,7 +35,13 @@ type kubeObject struct {
 }
 
 func (ko *kubeObject) loadDataFromFile() {
-	var err = yaml.Unmarshal([]byte(filesystem.LoadFileIfExists(ko.absolutePath)), &ko.rawData)
+	var fs = filesystem.Filesystem{}
+	var contents, err = fs.LoadFileIfExists(ko.absolutePath)
+	if err != nil {
+		panic(err)
+	}
+
+	err = yaml.Unmarshal([]byte(contents), &ko.rawData)
 	if err != nil {
 		panic(err)
 	}
@@ -49,19 +55,30 @@ func (kd *KubernetesDigests) loadDigests() {
 }
 
 func (kd *KubernetesDigests) loadDigestsInFolder(subfolder string) {
+	var fs = filesystem.Filesystem{}
 	var absolutePath string
-	for _, item := range filesystem.GetDirectoryContents(kd.BaseDirectory + subfolder) {
+	var directoryContents, err = fs.GetDirectoryContents(kd.BaseDirectory + subfolder)
+
+	if err != nil {
+		panic(err)
+	}
+	for _, item := range directoryContents {
 		if strings.HasPrefix(item, ".") {
 			continue
 		}
 		absolutePath = kd.BaseDirectory + subfolder + item
-		if filesystem.IsDirectory(absolutePath) {
+		if fs.IsDirectory(absolutePath) {
 			kd.loadDigestsInFolder(subfolder + item + "/")
 		} else {
+			var checksum string
+			checksum, err = fs.GetFileSHA256Checksum(absolutePath)
+			if err != nil {
+				panic(err)
+			}
 			var obj = kubeObject{
 				absolutePath: absolutePath,
 				relativePath: subfolder + item,
-				thumbprint:   filesystem.GetFileSHA256Checksum(absolutePath),
+				thumbprint:   checksum,
 			}
 			obj.loadDataFromFile()
 			kd.digests = append(kd.digests, &obj)

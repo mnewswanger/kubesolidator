@@ -4,10 +4,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	yaml "gopkg.in/yaml.v2"
-
 	"github.com/fatih/color"
-	"gitlab.home.mikenewswanger.com/golang/filesystem"
+	"github.com/ghodss/yaml"
+
+	"go.mikenewswanger.com/utilities/filesystem"
 )
 
 // Apply validates and applies the desired configuration to the cluster
@@ -75,25 +75,33 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 		}
 
 		if dryRun || verbosity > 0 {
+			color.White("Changes to apply for: " + kind)
+			var changesMade bool
 			if len(objectsToAdd) > 0 {
-				color.White("The following will be added:")
+				color.White("  The following will be added:")
 				for item := range objectsToAdd {
-					color.Green("  " + item)
+					color.Green("    " + item)
 				}
+				changesMade = true
 			}
 			if len(objectsToUpdate) > 0 {
-				color.White("The following will be updated:")
+				color.White("  The following will be updated:")
 				for item := range objectsToUpdate {
-					color.Yellow("  " + item)
+					color.Yellow("    " + item)
 				}
+				changesMade = true
 			}
 			if len(objectsToRemove) > 0 {
-				color.White("The following will be removed:")
+				color.White("  The following will be removed:")
 				for item := range objectsToRemove {
-					color.Red("  " + item)
+					color.Red("    " + item)
 				}
+				changesMade = true
 			}
-			println()
+			if !changesMade {
+				color.White("  No changes were made")
+			}
+			color.White("")
 		}
 
 		if !dryRun {
@@ -108,16 +116,18 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 				deleteKubernetesObject(kubectlContext, kind, o, debug, verbosity)
 			}
 			handleError(err)
-			filesystem.RemoveDirectory(tempDir, true)
+			var fs = filesystem.Filesystem{}
+			fs.RemoveDirectory(tempDir, true)
 		}
 	}
 }
 
 func (ko *kubeObject) apply(tempDir string, kubectlConext string, debug bool, verbosity uint8) {
+	var fs = filesystem.Filesystem{}
 	var filename = tempDir + "/" + ko.thumbprint
 	var yamlData, err = yaml.Marshal(ko.validatedData)
 	handleError(err)
-	filesystem.WriteFile(filename, yamlData, 0644)
+	fs.WriteFile(filename, yamlData, 0644)
 	applyKubernetesObject(kubectlConext, filename, debug, verbosity)
 }
 

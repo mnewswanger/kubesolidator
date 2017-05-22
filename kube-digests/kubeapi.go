@@ -5,7 +5,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"gitlab.home.mikenewswanger.com/golang/executil"
+	"go.mikenewswanger.com/utilities/executil"
 )
 
 type kubernetesObjectsStruct struct {
@@ -24,12 +24,14 @@ func applyKubernetesObject(kubectlContext string, file string, debug bool, verbo
 		args = append(args, "--context", kubectlContext)
 	}
 	args = append(args, "apply", "-f", file)
-	executil.Command{
+	var c = executil.Command{
 		Executable: "kubectl",
 		Arguments:  args,
-		Debug:      debug,
 		Verbosity:  verbosity,
-	}.RunWithRealtimeOutput()
+	}
+	if e := c.Run; e != nil {
+		panic(e)
+	}
 }
 
 func deleteKubernetesObject(kubectlContext string, kind string, item string, debug bool, verbosity uint8) {
@@ -49,17 +51,19 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string, deb
 
 	args = append(args, kubeObjectParts[1])
 
-	executil.Command{
+	var c = executil.Command{
 		Executable: "kubectl",
 		Arguments:  args,
-		Debug:      debug,
 		Verbosity:  verbosity,
-	}.RunWithRealtimeOutput()
+	}
+	if e := c.Run(); e != nil {
+		panic(e)
+	}
 }
 
 // loadKubernetesObjects by type
 func loadKubernetesObjects(kubectlContext string, kind string, debug bool, verbosity uint8) map[string]string {
-
+	var err error
 	var args = []string{}
 	if kubectlContext != "" {
 		args = []string{"--context", kubectlContext}
@@ -67,17 +71,19 @@ func loadKubernetesObjects(kubectlContext string, kind string, debug bool, verbo
 	args = append(args, "get", "--all-namespaces", "-o", "yaml", kind)
 
 	// Get the existing objects from kubectl
-	var output, err = executil.Command{
+	var c = executil.Command{
 		Name:       "Load kubernetes objects (kind: " + kind + ")",
 		Executable: "kubectl",
 		Arguments:  args,
-		Debug:      debug,
 		Verbosity:  verbosity,
-	}.RunWithOutput()
+	}
+
+	err = c.Run()
 	handleError(err)
 
+	var output = c.GetStdout()
 	var kubernetesObjects = kubernetesObjectsStruct{}
-	err = yaml.Unmarshal(output, &kubernetesObjects)
+	err = yaml.Unmarshal([]byte(output), &kubernetesObjects)
 	handleError(err)
 
 	var kubeObjectList = make(map[string]string)

@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"gitlab.home.mikenewswanger.com/infrastructure/kubesolidator/kube-digests"
+	"go.mikenewswanger.com/kubesolidator/kube-digests"
 )
 
 // applyCmd represents the apply command

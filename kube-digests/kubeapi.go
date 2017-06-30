@@ -27,7 +27,6 @@ func applyKubernetesObject(kubectlContext string, file string, debug bool, verbo
 	var c = executil.Command{
 		Executable: "kubectl",
 		Arguments:  args,
-		Verbosity:  verbosity,
 	}
 	if e := c.Run; e != nil {
 		panic(e)
@@ -54,7 +53,6 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string, deb
 	var c = executil.Command{
 		Executable: "kubectl",
 		Arguments:  args,
-		Verbosity:  verbosity,
 	}
 	if e := c.Run(); e != nil {
 		panic(e)
@@ -75,7 +73,6 @@ func loadKubernetesObjects(kubectlContext string, kind string, debug bool, verbo
 		Name:       "Load kubernetes objects (kind: " + kind + ")",
 		Executable: "kubectl",
 		Arguments:  args,
-		Verbosity:  verbosity,
 	}
 
 	err = c.Run()

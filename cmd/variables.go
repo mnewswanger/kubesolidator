@@ -1,5 +1,9 @@
 package cmd
 
+import (
+	"github.com/sirupsen/logrus"
+)
+
 type commandLineFlags struct {
 	dryRun                    bool
 	kubectlContext            string
@@ -10,3 +14,4 @@ type commandLineFlags struct {
 }
 
 var flags = commandLineFlags{}
+var logger = logrus.New()

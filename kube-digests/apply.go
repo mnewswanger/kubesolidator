@@ -116,18 +116,16 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 				deleteKubernetesObject(kubectlContext, kind, o, debug, verbosity)
 			}
 			handleError(err)
-			var fs = filesystem.Filesystem{}
-			fs.RemoveDirectory(tempDir, true)
+			filesystem.RemoveDirectory(tempDir, true)
 		}
 	}
 }
 
 func (ko *kubeObject) apply(tempDir string, kubectlConext string, debug bool, verbosity uint8) {
-	var fs = filesystem.Filesystem{}
 	var filename = tempDir + "/" + ko.thumbprint
 	var yamlData, err = yaml.Marshal(ko.validatedData)
 	handleError(err)
-	fs.WriteFile(filename, yamlData, 0644)
+	filesystem.WriteFile(filename, yamlData, 0644)
 	applyKubernetesObject(kubectlConext, filename, debug, verbosity)
 }
 

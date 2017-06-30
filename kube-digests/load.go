@@ -35,13 +35,12 @@ type kubeObject struct {
 }
 
 func (ko *kubeObject) loadDataFromFile() {
-	var fs = filesystem.Filesystem{}
-	var contents, err = fs.LoadFileIfExists(ko.absolutePath)
+	var contents, err = filesystem.LoadFileBytes(ko.absolutePath)
 	if err != nil {
 		panic(err)
 	}
 
-	err = yaml.Unmarshal([]byte(contents), &ko.rawData)
+	err = yaml.Unmarshal(contents, &ko.rawData)
 	if err != nil {
 		panic(err)
 	}
@@ -55,9 +54,8 @@ func (kd *KubernetesDigests) loadDigests() {
 }
 
 func (kd *KubernetesDigests) loadDigestsInFolder(subfolder string) {
-	var fs = filesystem.Filesystem{}
 	var absolutePath string
-	var directoryContents, err = fs.GetDirectoryContents(kd.BaseDirectory + subfolder)
+	var directoryContents, err = filesystem.GetDirectoryContents(kd.BaseDirectory + subfolder)
 
 	if err != nil {
 		panic(err)
@@ -67,11 +65,11 @@ func (kd *KubernetesDigests) loadDigestsInFolder(subfolder string) {
 			continue
 		}
 		absolutePath = kd.BaseDirectory + subfolder + item
-		if fs.IsDirectory(absolutePath) {
+		if filesystem.IsDirectory(absolutePath) {
 			kd.loadDigestsInFolder(subfolder + item + "/")
 		} else {
 			var checksum string
-			checksum, err = fs.GetFileSHA256Checksum(absolutePath)
+			checksum, err = filesystem.GetFileSHA256Checksum(absolutePath)
 			if err != nil {
 				panic(err)
 			}

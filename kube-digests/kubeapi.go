@@ -25,11 +25,12 @@ func applyKubernetesObject(kubectlContext string, file string, debug bool, verbo
 	}
 	args = append(args, "apply", "-f", file)
 	var c = executil.Command{
+		Name:       "Apply kubernetes object (" + file + ")",
 		Executable: "kubectl",
 		Arguments:  args,
 	}
-	if e := c.Run; e != nil {
-		panic(e)
+	if err := c.Run(); err != nil {
+		panic(err)
 	}
 }
 

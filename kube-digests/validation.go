@@ -2,6 +2,8 @@ package kubeDigests
 
 import (
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func (ko *kubeObject) addValidationError(error string) {
@@ -10,12 +12,16 @@ func (ko *kubeObject) addValidationError(error string) {
 
 // Validates validates properties of the Kubernetes objects defined in the digest
 func (kd *KubernetesDigests) Validates() bool {
+	hasErrors := false
 	for _, errors := range kd.Validate() {
 		if len(errors) > 0 {
-			return false
+			for _, e := range errors {
+				color.Red(e)
+			}
+			hasErrors = true
 		}
 	}
-	return true
+	return !hasErrors
 }
 
 // Validate validates properties of the Kubernetes objects defined in the digest

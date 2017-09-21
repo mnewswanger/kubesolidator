@@ -1,7 +1,7 @@
 package main
 
 import (
-    "go.mikenewswanger.com/kubesolidator/cmd"
+	"go.mikenewswanger.com/kubesolidator/cmd"
 )
 
 func main() {

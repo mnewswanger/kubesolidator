@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -30,3 +31,15 @@ func init() {
 	RootCmd.PersistentFlags().CountVarP(&flags.verbosity, "verbosity", "v", "Output verbosity")
 	RootCmd.PersistentFlags().BoolVarP(&flags.debug, "debug", "", false, "Debug level output")
 }
+
+type commandLineFlags struct {
+	dryRun                    bool
+	kubectlContext            string
+	kubernetesDigestDirectory string
+
+	debug     bool
+	verbosity int
+}
+
+var flags = commandLineFlags{}
+var logger = logrus.New()

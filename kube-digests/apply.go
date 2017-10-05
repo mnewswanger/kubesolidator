@@ -106,14 +106,14 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 
 		if !dryRun {
 			var tempDir, err = ioutil.TempDir(kd.BaseDirectory+"/", ".tmp-")
+			for o := range objectsToRemove {
+				deleteKubernetesObject(kubectlContext, kind, o, debug, verbosity)
+			}
 			for _, o := range objectsToAdd {
 				o.apply(tempDir, kubectlContext, debug, verbosity)
 			}
 			for _, o := range objectsToUpdate {
 				o.apply(tempDir, kubectlContext, debug, verbosity)
-			}
-			for o := range objectsToRemove {
-				deleteKubernetesObject(kubectlContext, kind, o, debug, verbosity)
 			}
 			handleError(err)
 			filesystem.RemoveDirectory(tempDir, true)

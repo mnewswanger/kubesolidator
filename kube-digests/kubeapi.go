@@ -52,6 +52,7 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string, deb
 	args = append(args, kubeObjectParts[1])
 
 	var c = executil.Command{
+		Name:       "Remove kubernetes object: " + kind + " - " + item,
 		Executable: "kubectl",
 		Arguments:  args,
 	}

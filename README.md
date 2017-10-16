@@ -1,5 +1,10 @@
 # Kubesolidator #
 
+## Installation ##
+
+`go get go.mikenewswanger.com/kubesolidator`
+
+
 Kubsolidator is designed to provide desired state configuration against Kubernetes clusters.
 
 Files should be formatted in the following pattern relative to the file base path:

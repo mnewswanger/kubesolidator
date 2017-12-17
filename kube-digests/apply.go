@@ -67,6 +67,9 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 		// Remove anything that exists but isn't in digests
 		for k := range kubernetesExisting {
 			if !objectsInDigest[k] {
+				if kind == "namespace" && (k == "kube-public:kube-public" || k == "kube-system:kube-system") {
+					continue
+				}
 				if kind == "service" && k == "default:kubernetes" {
 					continue
 				}

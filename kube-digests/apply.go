@@ -33,6 +33,7 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 	// Ordered list of kube object kinds to loop over
 	for _, kind := range []string{
 		"namespace",
+		"serviceaccount",
 		"persistentvolume",
 		"persistentvolumeclaim",
 		"configmap",

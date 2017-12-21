@@ -53,6 +53,9 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 			case "Service":
 				ko.validateService()
 				break
+			case "ServiceAccount":
+				ko.validateService()
+				break
 			default:
 				ko.addValidationError("Unsupported object type: " + kind)
 			}

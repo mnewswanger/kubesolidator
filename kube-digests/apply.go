@@ -7,15 +7,17 @@ import (
 	"github.com/fatih/color"
 	"github.com/ghodss/yaml"
 
+	"go.mikenewswanger.com/utilities/executil"
 	"go.mikenewswanger.com/utilities/filesystem"
 )
 
 // Apply validates and applies the desired configuration to the cluster
 func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug bool, verbosity uint8) {
+	executil.SetVerbosity(verbosity)
 	if verbosity > 0 {
 		color.White("Validating...")
 	}
-	if !kd.Validates() {
+	if !kd.Validates(verbosity > 0) {
 		color.Red("Validation Failed - Exiting")
 		os.Exit(1)
 	}

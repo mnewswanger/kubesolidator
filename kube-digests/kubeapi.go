@@ -1,10 +1,10 @@
 package kubeDigests
 
 import (
+	"bufio"
 	"strings"
 
-	"github.com/ghodss/yaml"
-
+	"github.com/fatih/color"
 	"go.mikenewswanger.com/utilities/executil"
 )
 
@@ -63,39 +63,47 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string, deb
 
 // loadKubernetesObjects by type
 func loadKubernetesObjects(kubectlContext string, kind string, debug bool, verbosity uint8) map[string]string {
-	var err error
-	var args = []string{}
+	args := []string{}
 	if kubectlContext != "" {
 		args = []string{"--context", kubectlContext}
 	}
-	args = append(args, "get", "--all-namespaces", "-o", "yaml", kind)
+	args = append(
+		args,
+		"get",
+		"--all-namespaces",
+		"--output",
+		"template",
+		kind,
+		"--template",
+		"{{range $k, $i := .items }}{{$i.metadata.namespace}}:{{$i.metadata.name}} {{if $i.metadata.annotations}}{{index $i.metadata.annotations \"kubesolidator.thumbprint\"}}{{end}}\n{{end}}",
+	)
 
 	// Get the existing objects from kubectl
-	var c = executil.Command{
+	c := executil.Command{
 		Name:       "Load kubernetes objects (kind: " + kind + ")",
 		Executable: "kubectl",
 		Arguments:  args,
 	}
 
-	err = c.Run()
+	err := c.Run()
 	handleError(err)
 
-	var output = c.GetStdout()
-	var kubernetesObjects = kubernetesObjectsStruct{}
-	err = yaml.Unmarshal([]byte(output), &kubernetesObjects)
-	handleError(err)
-
-	var kubeObjectList = make(map[string]string)
-	for _, item := range kubernetesObjects.Items {
-		switch kind {
-		case "namespace":
-			item.Metadata.Namespace = item.Metadata.Name
-			break
-		case "persistentvolume":
-			item.Metadata.Namespace = "_"
-			break
+	scanner := bufio.NewScanner(strings.NewReader(c.GetStdout()))
+	kubeObjectList := make(map[string]string)
+	if verbosity > 1 {
+		color.Blue("Objects of type already in cluster: " + kind)
+	}
+	for scanner.Scan() {
+		line := scanner.Text()
+		if verbosity > 1 {
+			color.Blue("  " + line)
 		}
-		kubeObjectList[item.Metadata.Namespace+":"+item.Metadata.Name] = item.Metadata.Annotations["kubesolidator.thumbprint"]
+		split := strings.Fields(line)
+		thumbprint := ""
+		if len(split) > 1 {
+			thumbprint = split[1]
+		}
+		kubeObjectList[split[0]] = thumbprint
 	}
 	return kubeObjectList
 }

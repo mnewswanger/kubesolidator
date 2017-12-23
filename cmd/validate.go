@@ -15,22 +15,14 @@ var validateCmd = &cobra.Command{
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		var kd = kubeDigests.KubernetesDigests{
+		kd := kubeDigests.KubernetesDigests{
 			BaseDirectory: flags.kubernetesDigestDirectory,
 		}
-		var hasErrors = false
-		for path, errors := range kd.Validate() {
-			hasErrors = true
-			color.Red(path)
-			for _, error := range errors {
-				color.Red("  " + error)
-			}
-			println()
-		}
-		if !hasErrors {
+		if kd.Validates(true) {
 			color.Green("Digests validated successfully")
 			println()
 		} else {
+			color.Red("Digest validation failed successfully")
 			os.Exit(1)
 		}
 	},

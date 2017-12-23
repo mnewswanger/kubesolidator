@@ -3,6 +3,8 @@ package kubeDigests
 import (
 	"strings"
 
+	"go.mikenewswanger.com/utilities/slices"
+
 	"github.com/fatih/color"
 )
 
@@ -11,15 +13,15 @@ func (ko *kubeObject) addValidationError(error string) {
 }
 
 // Validates validates properties of the Kubernetes objects defined in the digest
-func (kd *KubernetesDigests) Validates() bool {
+func (kd *KubernetesDigests) Validates(printErrors bool) bool {
 	hasErrors := false
-	for _, errors := range kd.Validate() {
-		if len(errors) > 0 {
-			for _, e := range errors {
-				color.Red(e)
-			}
-			hasErrors = true
+	for path, errors := range kd.Validate() {
+		hasErrors = true
+		color.Red(path)
+		for _, error := range errors {
+			color.Red("  " + error)
 		}
+		println()
 	}
 	return !hasErrors
 }
@@ -87,26 +89,25 @@ func (ko *kubeObject) validateBaseMetadata() {
 	}
 
 	// Validate namespace folder structure
-	if namespace, asserted := m["namespace"].(string); asserted {
-		switch ko.kind {
-		case "namespace":
-			ko.namespace = ko.name
-			break
-		case "persistentvolume":
-			ko.namespace = "_"
-			break
-		default:
-			ko.namespace = namespace
-		}
-
-		if !strings.HasPrefix(ko.relativePath, "/"+namespace+"/") {
-			ko.addValidationError("Should exist in proper namespace folder (/" + namespace + "/)")
+	namespace, namespaceSpecified := m["namespace"].(string)
+	if slices.ContainsString([]string{
+		"namespace",
+		"persistentvolume",
+	}, ko.kind) {
+		if namespaceSpecified {
+			ko.addValidationError("Contains 'namespace' property and is a global object")
 		}
 	} else {
-		ko.addValidationError("Missing 'namespace' property in metadata")
+		if namespaceSpecified {
+			ko.namespace = namespace
+		} else {
+			ko.addValidationError("Missing 'namespace' property in metadata")
+		}
 	}
 
-	ko.validatedData["metadata"] = m
+	if len(ko.validationErrors) == 0 {
+		ko.validatedData["metadata"] = m
+	}
 }
 
 func (ko *kubeObject) validateConfigMap() {

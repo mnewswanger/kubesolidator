@@ -38,26 +38,20 @@ func (kd *KubernetesDigests) Validate() map[string][]string {
 			ko.validateBaseMetadata()
 			switch kind {
 			case "ConfigMap":
-				ko.validateConfigMap()
-				break
+			case "ClusterRole":
+				ko.validateNotSystemObject()
+			case "ClusterRoleBinding":
+				ko.validateNotSystemObject()
 			case "Deployment":
-				ko.validateDeployment()
-				break
 			case "Namespace":
-				ko.validateNamespace()
-				break
 			case "PersistentVolume":
-				ko.validatePersistentVolume()
-				break
 			case "PersistentVolumeClaim":
-				ko.validatePersistentVolumeClaim()
-				break
+			case "Role":
+				ko.validateNotSystemObject()
+			case "RoleBinding":
+				ko.validateNotSystemObject()
 			case "Service":
-				ko.validateService()
-				break
 			case "ServiceAccount":
-				ko.validateService()
-				break
 			default:
 				ko.addValidationError("Unsupported object type: " + kind)
 			}
@@ -91,6 +85,8 @@ func (ko *kubeObject) validateBaseMetadata() {
 	// Validate namespace folder structure
 	namespace, namespaceSpecified := m["namespace"].(string)
 	if slices.ContainsString([]string{
+		"clusterrole",
+		"clusterrolebinding",
 		"namespace",
 		"persistentvolume",
 	}, ko.kind) {
@@ -110,20 +106,8 @@ func (ko *kubeObject) validateBaseMetadata() {
 	}
 }
 
-func (ko *kubeObject) validateConfigMap() {
-}
-
-func (ko *kubeObject) validateDeployment() {
-}
-
-func (ko *kubeObject) validateNamespace() {
-}
-
-func (ko *kubeObject) validatePersistentVolume() {
-}
-
-func (ko *kubeObject) validatePersistentVolumeClaim() {
-}
-
-func (ko *kubeObject) validateService() {
+func (ko *kubeObject) validateNotSystemObject() {
+	if strings.Index(ko.name, ":system:") == 0 {
+		ko.addValidationError("User defined objects cannot be prefixed with ':system:'")
+	}
 }

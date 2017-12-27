@@ -15,7 +15,7 @@ var applyCmd = &cobra.Command{
 		var kd = kubeDigests.KubernetesDigests{
 			BaseDirectory: flags.kubernetesDigestDirectory,
 		}
-		kd.Apply(flags.kubectlContext, flags.dryRun, flags.debug, uint8(flags.verbosity))
+		kd.Apply(flags.kubectlContext, flags.dryRun)
 	},
 }
 

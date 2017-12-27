@@ -9,10 +9,11 @@ import (
 
 	"go.mikenewswanger.com/utilities/executil"
 	"go.mikenewswanger.com/utilities/filesystem"
+	"go.mikenewswanger.com/utilities/slices"
 )
 
 // Apply validates and applies the desired configuration to the cluster
-func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug bool, verbosity uint8) {
+func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 	executil.SetVerbosity(verbosity)
 	if verbosity > 0 {
 		color.White("Validating...")
@@ -35,6 +36,10 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 	// Ordered list of kube object kinds to loop over
 	for _, kind := range []string{
 		"namespace",
+		"clusterrole",
+		"clusterrolebinding",
+		"role",
+		"rolebinding",
 		"serviceaccount",
 		"persistentvolume",
 		"persistentvolumeclaim",
@@ -45,12 +50,12 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 		if verbosity > 0 {
 			color.White("Determining deltas for type " + kind)
 		}
-		var kubernetesExisting = loadKubernetesObjects(kubectlContext, kind, debug, verbosity)
+		kubernetesExisting := loadKubernetesObjects(kubectlContext, kind)
 
-		var objectsInDigest = make(map[string]bool)
-		var objectsToAdd = make(map[string]*kubeObject)
-		var objectsToUpdate = make(map[string]*kubeObject)
-		var objectsToRemove = make(map[string]bool)
+		objectsInDigest := map[string]bool{}
+		objectsToAdd := map[string]*kubeObject{}
+		objectsToUpdate := map[string]*kubeObject{}
+		objectsToRemove := map[string]bool{}
 
 		for _, o := range kubeObjectsByKind[kind] {
 			o.addAnnotation("thumbprint", o.thumbprint)
@@ -112,14 +117,21 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 
 		if !dryRun {
 			var tempDir, err = ioutil.TempDir(kd.BaseDirectory+"/", ".tmp-")
-			for o := range objectsToRemove {
-				deleteKubernetesObject(kubectlContext, kind, o, debug, verbosity)
+			if !slices.ContainsString([]string{
+				"clusterrole",
+				"clusterrolebinding",
+				"role",
+				"rolebinding",
+			}, kind) {
+				for o := range objectsToRemove {
+					deleteKubernetesObject(kubectlContext, kind, o)
+				}
 			}
 			for _, o := range objectsToAdd {
-				o.apply(tempDir, kubectlContext, debug, verbosity)
+				o.apply(tempDir, kubectlContext)
 			}
 			for _, o := range objectsToUpdate {
-				o.apply(tempDir, kubectlContext, debug, verbosity)
+				o.apply(tempDir, kubectlContext)
 			}
 			handleError(err)
 			filesystem.RemoveDirectory(tempDir, true)
@@ -127,12 +139,12 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool, debug boo
 	}
 }
 
-func (ko *kubeObject) apply(tempDir string, kubectlConext string, debug bool, verbosity uint8) {
+func (ko *kubeObject) apply(tempDir string, kubectlConext string) {
 	var filename = tempDir + "/" + ko.thumbprint
 	var yamlData, err = yaml.Marshal(ko.validatedData)
 	handleError(err)
 	filesystem.WriteFile(filename, yamlData, 0644)
-	applyKubernetesObject(kubectlConext, filename, debug, verbosity)
+	applyKubernetesObject(kubectlConext, filename)
 }
 
 func (ko *kubeObject) addAnnotation(name string, value string) {

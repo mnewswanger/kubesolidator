@@ -6,6 +6,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"go.mikenewswanger.com/kubesolidator/kube-digests"
 )
 
 var cfgFile string
@@ -15,6 +17,29 @@ var RootCmd = &cobra.Command{
 	Use:   "kubesolidator",
 	Short: "",
 	Long:  ``,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		switch flags.verbosity {
+		case 0:
+			logger.Level = logrus.ErrorLevel
+			break
+		case 1:
+			logger.Level = logrus.WarnLevel
+			break
+		case 2:
+			fallthrough
+		case 3:
+			logger.Level = logrus.InfoLevel
+			break
+		default:
+			logger.Level = logrus.DebugLevel
+			break
+		}
+
+		kubeDigests.SetLogger(logger)
+		kubeDigests.SetVerbosity(uint8(flags.verbosity))
+
+		logger.Debug("Pre-run complete")
+	},
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -29,7 +54,6 @@ func Execute() {
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&flags.kubernetesDigestDirectory, "kubernetes-digest-directory", "d", "", "Directory containing Kubernetes digests")
 	RootCmd.PersistentFlags().CountVarP(&flags.verbosity, "verbosity", "v", "Output verbosity")
-	RootCmd.PersistentFlags().BoolVarP(&flags.debug, "debug", "", false, "Debug level output")
 }
 
 type commandLineFlags struct {
@@ -37,7 +61,6 @@ type commandLineFlags struct {
 	kubectlContext            string
 	kubernetesDigestDirectory string
 
-	debug     bool
 	verbosity int
 }
 

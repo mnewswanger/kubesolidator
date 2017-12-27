@@ -18,7 +18,7 @@ type kubernetesObjectsStruct struct {
 	}
 }
 
-func applyKubernetesObject(kubectlContext string, file string, debug bool, verbosity uint8) {
+func applyKubernetesObject(kubectlContext string, file string) {
 	var args = []string{}
 	if kubectlContext != "" {
 		args = append(args, "--context", kubectlContext)
@@ -34,7 +34,7 @@ func applyKubernetesObject(kubectlContext string, file string, debug bool, verbo
 	}
 }
 
-func deleteKubernetesObject(kubectlContext string, kind string, item string, debug bool, verbosity uint8) {
+func deleteKubernetesObject(kubectlContext string, kind string, item string) {
 	var args = []string{}
 
 	if kubectlContext != "" {
@@ -62,7 +62,7 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string, deb
 }
 
 // loadKubernetesObjects by type
-func loadKubernetesObjects(kubectlContext string, kind string, debug bool, verbosity uint8) map[string]string {
+func loadKubernetesObjects(kubectlContext string, kind string) map[string]string {
 	args := []string{}
 	if kubectlContext != "" {
 		args = []string{"--context", kubectlContext}

@@ -44,7 +44,7 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string) {
 	args = append(args, "delete", kind)
 
 	// [0] = namespace; [1] = name
-	var kubeObjectParts = strings.Split(item, ":")
+	var kubeObjectParts = strings.SplitN(item, ":", 2)
 	if kubeObjectParts[0] != "_" {
 		args = append(args, "--namespace", kubeObjectParts[0])
 	}
@@ -99,6 +99,9 @@ func loadKubernetesObjects(kubectlContext string, kind string) map[string]string
 			color.Blue("  " + line)
 		}
 		split := strings.Fields(line)
+		if strings.SplitN(split[0], ":", 3)[1] == "system" {
+			continue
+		}
 		thumbprint := ""
 		if len(split) > 1 {
 			thumbprint = split[1]

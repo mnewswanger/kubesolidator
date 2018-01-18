@@ -1,0 +1,4 @@
+baseURL = "https://go.mikenewswanger.com"
+languageCode = "en-us"
+title = "Kubesolidator"
+theme = "kube"

@@ -1,0 +1,3 @@
+#kube-features .row:first-child {
+    border-bottom: none;
+}

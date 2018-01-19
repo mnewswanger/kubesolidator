@@ -35,7 +35,7 @@ jobs:
     steps:
       - restore_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-      - run: sed -i -r "s/^baseURL(\s+)?=.*$/baseURL = \"go.mikenewswanger.com\/kubesolidator\"/" config.toml
+      - run: sed -i -r "s/^baseURL(\s+)?=.*$/baseURL = \"go.mikenewswanger.com\/kubesolidator\"/" docs/config.toml
       - run:
           name: "Run Hugo"
           command: HUGO_ENV=production hugo -v -s /go/src/go.mikenewswanger.com/kubesolidator/docs =

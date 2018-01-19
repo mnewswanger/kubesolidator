@@ -38,7 +38,7 @@ jobs:
       - run: sed -i -r "s/^baseURL(\s+)?=.*$/baseURL = \"go.mikenewswanger.com\/kubesolidator\"/" docs/config.toml
       - run:
           name: "Run Hugo"
-          command: HUGO_ENV=production hugo -v -s /go/src/go.mikenewswanger.com/kubesolidator/docs =
+          command: HUGO_ENV=production hugo -v -s /go/src/go.mikenewswanger.com/kubesolidator/docs
 workflows:
   version: 2
   build-and-deploy:

@@ -32,14 +32,13 @@
   <link rel="prev" href="{{ .Params.prev }}"> {{ end }} {{ if (isset .Params "next") }}
   <link rel="next" href="{{ .Params.next }}"> {{ end }}
 
-  {{ partial "favicon" . }}
+  <link rel="shortcut icon" type="image/ico" href="{{ "/favicon.ico" | relURL }}">
 
   <link href="{{ "/css/font.css" | relURL }}" rel="stylesheet" type="text/css">
   <link href="{{ "/css/kube.min.css" | relURL }}" rel="stylesheet" type="text/css">
   <link href="{{ "/css/kube.legenda.css" | relURL }}" rel="stylesheet" type="text/css">
   <link href="{{ "/css/highlight.css" | relURL }}" rel="stylesheet" type="text/css">
   <link href="{{ "/css/master.css" | relURL }}" rel="stylesheet" type="text/css">
-  <link href="{{ "/css/kube.demo.css" | relURL }}" rel="stylesheet" type="text/css">
 <!-- Your own theme here -->
  <link href="{{ "/css/custom.css" | relURL }}" rel="stylesheet" type="text/css">
 <!-- js vendor -->
@@ -55,13 +54,10 @@
   <main>{{ block "main" . }}{{ end }}</main>
   <footer>{{ block "footer" . }}{{ end }}</footer>
 
-
-  <script src="{{ "/js/kube.js" | relURL }}" type="text/javascript">
-  </script>
-  <script src="{{ "/js/kube.legenda.js" | relURL }}" type="text/javascript">
-  </script>
-  <script src="{{ "/js/master.js" | relURL }}" type="text/javascript">
-  </script>
+  <script src="{{ "/js/fontawesome.min.js" | relURL }}" type="text/javascript"></script>
+  <script src="{{ "/js/kube.js" | relURL }}" type="text/javascript"></script>
+  <script src="{{ "/js/kube.legenda.js" | relURL }}" type="text/javascript"></script>
+  <script src="{{ "/js/master.js" | relURL }}" type="text/javascript"></script>
 </body>
 
 </html>

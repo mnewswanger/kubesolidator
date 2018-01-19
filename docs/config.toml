@@ -2,3 +2,23 @@ baseURL = "https://go.mikenewswanger.com"
 languageCode = "en-us"
 title = "Kubesolidator"
 theme = "kube"
+
+[[menu.main]]
+    name = "About"
+    weight = -100
+    url = "/about/"
+
+[[menu.main]]
+    name = "Download"
+    weight = -100
+    url = "/downloads/"
+
+[[menu.main]]
+    name = "Get Started"
+    weight = -100
+    url = "/getting-started/"
+
+[[menu.main]]
+    name = "Usage"
+    weight = -100
+    url = "/usage/"

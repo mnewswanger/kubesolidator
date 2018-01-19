@@ -27,7 +27,7 @@ jobs:
     working_directory: /go/src/go.mikenewswanger.com/kubesolidator
     steps:
       - restore_cache:
-          key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
   build_documentation:
     docker:
       - image: felicianotech/docker-hugo:0.32.4

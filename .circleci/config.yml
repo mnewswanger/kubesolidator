@@ -3,24 +3,67 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  checkout_code:
     docker:
-      # specify the version
       - image: circleci/golang:1.9
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/mnewswanger/kubesolidator
     steps:
       - checkout
-
-      # specify any bash command here prefixed with `run: `
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - /go/src/github.com/mnewswanger/kubesolidator
+  get_dependencies:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/mnewswanger/kubesolidator
+    steps:
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run: go get -v -t -d ./...
+      - save_cache:
+          key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - /go/src/github.com/mnewswanger/kubesolidator
+  test_codebase:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/mnewswanger/kubesolidator
+    steps:
+      - restore_cache:
+          key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
       - run: go test -v ./...
+  build_codebase:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/mnewswanger/kubesolidator
+    steps:
+      - restore_cache:
+          key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
+  build_documentation:
+    docker:
+      - image: felicianotech/docker-hugo:0.22.1
+    working_directory: /go/src/github.com/mnewswanger/kubesolidator
+    steps:
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: "Run Hugo"
+          command: HUGO_ENV=production hugo -v -s /go/src/github.com/mnewswanger/kubesolidator/docs
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - checkout_code
+      - get_dependencies:
+          requires:
+            - checkout_code
+      - test_codebase:
+          requires:
+            - get_dependencies
+      - build_codebase:
+          requires:
+            - get_dependencies
+      - build_documentation:
+          requires:
+            - checkout_code

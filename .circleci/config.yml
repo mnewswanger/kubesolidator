@@ -48,7 +48,7 @@ workflows:
             - checkout_code
       - build_codebase:
           requires:
-            - get_dependencies
+            - checkout_code
       - build_documentation:
           requires:
             - checkout_code

@@ -9,9 +9,9 @@ description = "Desired State Deployment for Kubernetes"
     <p>Desired State Deployment for Kubernetes</p>
   </div>
   <div id="action-buttons">
-    <a class="button primary big" href="/getting-started/">Get Started</a>
+    <a class="button primary big" href="{{< relref "getting-started.md" >}}">Get Started</a>
     <a class="button outline big" href="https://github.com/mnewswanger/kubesolidator" onclick="_gaq.push(['_trackEvent', 'kubesolidator', 'github']);">View on Github</a>
-    <a class="button outline big" href="/downloads/">Download</a>
+    <a class="button outline big" href="{{< relref "downloads.md" >}}" >Download</a>
   </div>
   <div id="kube-features">
     <div class="row gutters">

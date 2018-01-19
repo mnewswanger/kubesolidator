@@ -6,17 +6,17 @@ jobs:
   checkout_code:
     docker:
       - image: circleci/golang:1.9
-    working_directory: /go/src/go.mikenewswanger.com/kubesolidator
+    working_directory: /usr/local/go/src/go.mikenewswanger.com/kubesolidator
     steps:
       - checkout
       - save_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - /go/src/
+            - /usr/local/go/src/go.mikenewswanger.com/kubesolidator
   get_dependencies:
     docker:
       - image: circleci/golang:1.9
-    working_directory: /go/src/go.mikenewswanger.com/kubesolidator
+    working_directory: /usr/local/go/src/go.mikenewswanger.com/kubesolidator
     steps:
       - restore_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
@@ -24,11 +24,11 @@ jobs:
       - save_cache:
           key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - /go/src/
+            - /usr/local/go/src/
   test_codebase:
     docker:
       - image: circleci/golang:1.9
-    working_directory: /go/src/go.mikenewswanger.com/kubesolidator
+    working_directory: /usr/local/go/src/go.mikenewswanger.com/kubesolidator
     steps:
       - restore_cache:
           key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
@@ -36,20 +36,20 @@ jobs:
   build_codebase:
     docker:
       - image: circleci/golang:1.9
-    working_directory: /go/src/go.mikenewswanger.com/kubesolidator
+    working_directory: /usr/local/go/src/go.mikenewswanger.com/kubesolidator
     steps:
       - restore_cache:
           key: v1-repo-deps-{{ .Environment.CIRCLE_SHA1 }}
   build_documentation:
     docker:
-      - image: felicianotech/docker-hugo:0.22.1
-    working_directory: /go/src/go.mikenewswanger.com/kubesolidator
+      - image: felicianotech/docker-hugo:0.32.4
+    working_directory: /usr/local/go/src/go.mikenewswanger.com/kubesolidator
     steps:
       - restore_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Run Hugo"
-          command: HUGO_ENV=production hugo -v -s /go/src/go.mikenewswanger.com/kubesolidator
+          command: HUGO_ENV=production hugo -v -s /usr/local/go/src/go.mikenewswanger.com/kubesolidator
 workflows:
   version: 2
   build-and-deploy:

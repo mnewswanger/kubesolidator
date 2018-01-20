@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/mnewswanger/kubesolidator.svg?style=svg)](https://circleci.com/gh/mnewswanger/kubesolidator)
+
 # Kubesolidator #
 
 ## Installation ##

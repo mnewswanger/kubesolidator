@@ -2,4 +2,4 @@
 
 # Kubesolidator #
 
-Visit the [project website](https://go.mikenewswanger.com/kubesolidator) or launch the documentation (`/docs`) via [hugo](https://gohugio.io).
+Visit the [project website](https://go.mikenewswanger.com/kubesolidator) or launch the documentation (`/docs`) via [hugo](https://gohugo.io).

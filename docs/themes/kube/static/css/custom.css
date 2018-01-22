@@ -1,0 +1,30 @@
+#kube-features .row:first-child {
+    border-bottom: none;
+}
+
+#footer nav ul li {
+    font-size: 1.5em;
+    margin: 0 5px;
+}
+
+#posts {
+	margin-top: 0;
+	max-width: 960px;
+    text-align: left;
+}
+
+#posts ul li {
+    margin-bottom: 10px;
+}
+
+#posts #action-buttons {
+	margin-top: 50px;
+}
+
+pre code {
+	text-align: left;
+}
+
+code {
+    background-color: #f3f3f3;
+}

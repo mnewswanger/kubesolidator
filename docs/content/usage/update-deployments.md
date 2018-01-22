@@ -1,6 +1,7 @@
 +++
-title = "About"
-description = "Desired State Deployment for Kubernetes"
+title = "Update Deployments"
+description = "-"
+weight = 20
 +++
 
 Kubesolidator is designed to help codify your infrastructure.  It provides a fast, consistent way to deploy using a gitops workflow.
@@ -16,8 +17,3 @@ Kubesolidator allows common workflows such as updating deployment images and sca
 ### Fast ###
 
 Performance is a priority whether you're running on a single node or into the hundreds.
-
-<div id="action-buttons">
-    <a class="button primary big" href="{{< ref "getting-started.md" >}}">Get Started</a>
-    <a class="button outline big" href="{{< ref "downloads.md" >}}" >Download</a>
-</div>

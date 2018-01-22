@@ -5,13 +5,20 @@
 
 <div id="hero" class="wrap">
   <h1>{{.Title }}</h1>
-    <p>{{.Params.description}}</p>
+  <p>{{.Params.description}}</p>
 </div>
-<ul id="posts">
+<div id="posts">
 
  {{ .Content }}
   
-</ul>
+</div>
+
+{{ if ne .Section "" }}
+	<div id="action-buttons">
+	    <a class="button outline big" href="{{ .Section | relURL }}">{{ title .Section }}<a>
+	</div>
+{{ end }}
+
 {{ end }} 
 {{ define "footer" }} 
   {{ partial "footer" . }} 

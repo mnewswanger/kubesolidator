@@ -12,6 +12,8 @@ import (
 	"go.mikenewswanger.com/utilities/slices"
 )
 
+var annotationPrefix = "go.mikenewswanger.com/kubesolidator"
+
 // Apply validates and applies the desired configuration to the cluster
 func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 	executil.SetVerbosity(verbosity)
@@ -153,7 +155,7 @@ func (ko *kubeObject) addAnnotation(name string, value string) {
 	if !exists {
 		a = make(map[string]interface{})
 	}
-	a["kubesolidator."+name] = value
+	a[annotationPrefix+"."+name] = value
 	m["annotations"] = a
 	ko.validatedData["metadata"] = m
 }

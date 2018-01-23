@@ -75,7 +75,7 @@ func loadKubernetesObjects(kubectlContext string, kind string) map[string]string
 		"template",
 		kind,
 		"--template",
-		"{{range $k, $i := .items }}{{$i.metadata.namespace}}:{{$i.metadata.name}} {{if $i.metadata.annotations}}{{index $i.metadata.annotations \"kubesolidator.thumbprint\"}}{{end}}\n{{end}}",
+		"{{range $k, $i := .items }}{{$i.metadata.namespace}}:{{$i.metadata.name}} {{if $i.metadata.annotations}}{{index $i.metadata.annotations \""+annotationPrefix+".thumbprint\"}}{{end}}\n{{end}}",
 	)
 
 	// Get the existing objects from kubectl

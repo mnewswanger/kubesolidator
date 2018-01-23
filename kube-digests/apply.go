@@ -12,6 +12,59 @@ import (
 	"go.mikenewswanger.com/utilities/slices"
 )
 
+// Ordered list of kube object types to loop over
+var kubernetesObjectTypes = []kubernetesObjectTypeStruct{
+	kubernetesObjectTypeStruct{
+		name:  "namespace",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "clusterrole",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "clusterrolebinding",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "role",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "rolebinding",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "serviceaccount",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "persistentvolume",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "persistentvolumeclaim",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "configmap",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "deployment",
+		apply: true,
+	},
+	kubernetesObjectTypeStruct{
+		name:  "service",
+		apply: true,
+	},
+}
+
+type kubernetesObjectTypeStruct struct {
+	name  string
+	apply bool
+}
+
 var annotationPrefix = "go.mikenewswanger.com/kubesolidator"
 
 // Apply validates and applies the desired configuration to the cluster
@@ -35,31 +88,21 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 		kubeObjectsByKind[d.kind] = append(kubeObjectsByKind[d.kind], d)
 	}
 
-	// Ordered list of kube object kinds to loop over
-	for _, kind := range []string{
-		"namespace",
-		"clusterrole",
-		"clusterrolebinding",
-		"role",
-		"rolebinding",
-		"serviceaccount",
-		"persistentvolume",
-		"persistentvolumeclaim",
-		"configmap",
-		"deployment",
-		"service",
-	} {
-		if verbosity > 0 {
-			color.White("Determining deltas for type " + kind)
+	for _, kot := range kubernetesObjectTypes {
+		if !kot.apply {
+			continue
 		}
-		kubernetesExisting := loadKubernetesObjects(kubectlContext, kind)
+		if verbosity > 0 {
+			color.White("Determining deltas for type " + kot.name)
+		}
+		kubernetesExisting := loadKubernetesObjects(kubectlContext, kot.name)
 
 		objectsInDigest := map[string]bool{}
 		objectsToAdd := map[string]*kubeObject{}
 		objectsToUpdate := map[string]*kubeObject{}
 		objectsToRemove := map[string]bool{}
 
-		for _, o := range kubeObjectsByKind[kind] {
+		for _, o := range kubeObjectsByKind[kot.name] {
 			o.addAnnotation("thumbprint", o.thumbprint)
 			objectsInDigest[o.namespace+":"+o.name] = true
 			// Add anything in digests that doesn't already exist
@@ -77,10 +120,10 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 		// Remove anything that exists but isn't in digests
 		for k := range kubernetesExisting {
 			if !objectsInDigest[k] {
-				if kind == "namespace" && (k == "kube-public:kube-public" || k == "kube-system:kube-system") {
+				if kot.name == "namespace" && (k == "kube-public:kube-public" || k == "kube-system:kube-system") {
 					continue
 				}
-				if kind == "service" && k == "default:kubernetes" {
+				if kot.name == "service" && k == "default:kubernetes" {
 					continue
 				}
 				objectsToRemove[k] = true
@@ -88,7 +131,7 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 		}
 
 		if dryRun || verbosity > 0 {
-			color.White("Changes to apply for: " + kind)
+			color.White("Changes to apply for: " + kot.name)
 			changesMade := false
 			if len(objectsToAdd) > 0 {
 				color.White("  The following will be added:")
@@ -124,9 +167,9 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 				"clusterrolebinding",
 				"role",
 				"rolebinding",
-			}, kind) {
+			}, kot.name) {
 				for o := range objectsToRemove {
-					deleteKubernetesObject(kubectlContext, kind, o)
+					deleteKubernetesObject(kubectlContext, kot.name, o)
 				}
 			}
 			for _, o := range objectsToAdd {

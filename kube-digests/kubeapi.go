@@ -19,12 +19,12 @@ type kubernetesObjectsStruct struct {
 }
 
 func applyKubernetesObject(kubectlContext string, file string) {
-	var args = []string{}
+	args := []string{}
 	if kubectlContext != "" {
 		args = append(args, "--context", kubectlContext)
 	}
 	args = append(args, "apply", "-f", file)
-	var c = executil.Command{
+	c := executil.Command{
 		Name:       "Apply kubernetes object (" + file + ")",
 		Executable: "kubectl",
 		Arguments:  args,
@@ -35,7 +35,7 @@ func applyKubernetesObject(kubectlContext string, file string) {
 }
 
 func deleteKubernetesObject(kubectlContext string, kind string, item string) {
-	var args = []string{}
+	args := []string{}
 
 	if kubectlContext != "" {
 		args = append(args, "--context", kubectlContext)
@@ -44,14 +44,14 @@ func deleteKubernetesObject(kubectlContext string, kind string, item string) {
 	args = append(args, "delete", kind)
 
 	// [0] = namespace; [1] = name
-	var kubeObjectParts = strings.SplitN(item, ":", 2)
+	kubeObjectParts := strings.SplitN(item, ":", 2)
 	if kubeObjectParts[0] != "_" {
 		args = append(args, "--namespace", kubeObjectParts[0])
 	}
 
 	args = append(args, kubeObjectParts[1])
 
-	var c = executil.Command{
+	c := executil.Command{
 		Name:       "Remove kubernetes object: " + kind + " - " + item,
 		Executable: "kubectl",
 		Arguments:  args,

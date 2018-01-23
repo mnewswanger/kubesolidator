@@ -30,7 +30,7 @@ func (kd *KubernetesDigests) Validates(printErrors bool) bool {
 func (kd *KubernetesDigests) Validate() map[string][]string {
 	kd.loadDigests()
 
-	var validationErrors = make(map[string][]string)
+	validationErrors := make(map[string][]string)
 
 	for _, ko := range kd.digests {
 		ko.validatedData = ko.rawData.(map[string]interface{})
@@ -74,7 +74,7 @@ func (ko *kubeObject) validateBaseMetadata() {
 	// Validate filename
 	if name, asserted := m["name"].(string); asserted {
 		ko.name = name
-		var filenameShouldBe = name + "." + ko.kind + ".yml"
+		filenameShouldBe := name + "." + ko.kind + ".yml"
 		if !strings.HasSuffix(ko.relativePath, filenameShouldBe) {
 			ko.addValidationError("Imporoperly named file (should be " + filenameShouldBe + ")")
 		}

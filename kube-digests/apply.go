@@ -30,7 +30,7 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 	}
 
 	// Sort kubeObjects by Kind
-	var kubeObjectsByKind = make(map[string][]*kubeObject)
+	kubeObjectsByKind := make(map[string][]*kubeObject)
 	for _, d := range kd.digests {
 		kubeObjectsByKind[d.kind] = append(kubeObjectsByKind[d.kind], d)
 	}
@@ -89,7 +89,7 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 
 		if dryRun || verbosity > 0 {
 			color.White("Changes to apply for: " + kind)
-			var changesMade bool
+			changesMade := false
 			if len(objectsToAdd) > 0 {
 				color.White("  The following will be added:")
 				for item := range objectsToAdd {
@@ -118,7 +118,7 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 		}
 
 		if !dryRun {
-			var tempDir, err = ioutil.TempDir(kd.BaseDirectory+"/", ".tmp-")
+			tempDir, err := ioutil.TempDir(kd.BaseDirectory+"/", ".tmp-")
 			if !slices.ContainsString([]string{
 				"clusterrole",
 				"clusterrolebinding",
@@ -142,16 +142,16 @@ func (kd *KubernetesDigests) Apply(kubectlContext string, dryRun bool) {
 }
 
 func (ko *kubeObject) apply(tempDir string, kubectlConext string) {
-	var filename = tempDir + "/" + ko.thumbprint
-	var yamlData, err = yaml.Marshal(ko.validatedData)
+	filename := tempDir + "/" + ko.thumbprint
+	yamlData, err := yaml.Marshal(ko.validatedData)
 	handleError(err)
 	filesystem.WriteFile(filename, yamlData, 0644)
 	applyKubernetesObject(kubectlConext, filename)
 }
 
 func (ko *kubeObject) addAnnotation(name string, value string) {
-	var m = ko.validatedData["metadata"].(map[string]interface{})
-	var a, exists = m["annotations"].(map[string]interface{})
+	m := ko.validatedData["metadata"].(map[string]interface{})
+	a, exists := m["annotations"].(map[string]interface{})
 	if !exists {
 		a = make(map[string]interface{})
 	}

@@ -54,7 +54,6 @@ func (kd *KubernetesDigests) loadDigests() {
 }
 
 func (kd *KubernetesDigests) loadDigestsInFolder(subfolder string) {
-	var absolutePath string
 	directoryContents, err := filesystem.GetDirectoryContents(kd.BaseDirectory + subfolder)
 
 	if err != nil {
@@ -64,16 +63,16 @@ func (kd *KubernetesDigests) loadDigestsInFolder(subfolder string) {
 		if strings.HasPrefix(item, ".") {
 			continue
 		}
-		absolutePath = kd.BaseDirectory + subfolder + item
+		absolutePath := kd.BaseDirectory + subfolder + item
 		if filesystem.IsDirectory(absolutePath) {
 			kd.loadDigestsInFolder(subfolder + item + "/")
 		} else {
-			var checksum string
+			checksum := ""
 			checksum, err = filesystem.GetFileSHA256Checksum(absolutePath)
 			if err != nil {
 				panic(err)
 			}
-			var obj = kubeObject{
+			obj := kubeObject{
 				absolutePath: absolutePath,
 				relativePath: subfolder + item,
 				thumbprint:   checksum,
